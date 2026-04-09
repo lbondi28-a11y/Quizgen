@@ -154,7 +154,21 @@ def call_groq_json(prompt: str, api_key: str) -> dict:
     resp = requests.post(url, headers=headers, json=payload, timeout=60)
     resp.raise_for_status()
     content = resp.json()["choices"][0]["message"]["content"]
-    return json.loads(content)
+    if content.startswith("```"):
+        content = content.removeprefix("```json").removeprefix("```").strip()
+        if content.endswith("```"):
+            content = content[:-3].strip()
+    
+    try:
+        return json.loads(content)
+    except json.JSONDecodeError as e:
+        st.error(f"Groq returned invalid JSON: {e}")
+        st.write("Raw model output (first 2000 chars):")
+        st.code(content[:2000])
+        st.write("Raw model output (last 2000 chars):")
+        st.code(content[-2000:])
+        raise
+
 
 def _slug_quiz_type(label: str) -> str:
     mapping = {
