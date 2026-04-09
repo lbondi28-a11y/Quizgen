@@ -124,7 +124,6 @@ QUIZ_TYPES = [
 ]
 
 if not st.session_state["locked"]:
-    st.text_input("Subject", key="subject")
     st.selectbox("Quiz type", options=QUIZ_TYPES, key="quiz_type")
     st.number_input(
         "Number of questions",
@@ -259,7 +258,7 @@ Create exactly {n} questions of type "flashcard".
 """.strip()
 
     return f"""
-You are generating a quiz for the subject: "{subject}".
+You are generating a quiz based ONLY on the study material below.
 
 Use ONLY the study material below. Do not use outside knowledge.
 
@@ -281,15 +280,12 @@ Study material:
 # -------------------------
 if st.button("Generate Quiz", type="primary"):
     groq_key_val = GROQ_API_KEY  # from terminal env var (hidden)
-    subject_val = st.session_state.get("subject", "").strip()
     notes_val = st.session_state.get("notes", "").strip()
     quiz_type_val = st.session_state.get("quiz_type", "Multiple Choice")
     n_val = int(st.session_state.get("num_questions", 5))
 
     if not groq_key_val:
         st.warning("Missing GROQ_API_KEY. Set it in the terminal and rerun Streamlit.")
-    elif not subject_val:
-        st.warning("Please enter a subject.")
     elif not notes_val:
         st.warning("Please paste notes so I have study material.")
     else:
@@ -299,7 +295,7 @@ if st.button("Generate Quiz", type="primary"):
         for k in list(st.session_state.keys()):
             if k.startswith("answer_"):
                 del st.session_state[k]
-
+        subject_val = "Study Notes"
         prompt = build_prompt(subject_val, notes_val, quiz_type_val, n_val)
         with st.spinner("Generating quiz with Groq..."):
             try:
