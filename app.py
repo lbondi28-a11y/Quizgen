@@ -129,7 +129,7 @@ if not st.session_state["locked"]:
     st.number_input(
         "Number of questions",
         min_value=1,
-        max_value=25,
+        max_value=15,
         value=5,
         step=1,
         key="num_questions",
